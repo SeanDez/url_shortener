@@ -1,5 +1,12 @@
 extends layout
 
+block headline
+    h1 URL Shortener
+
 block content
-  h1= title
-  p Welcome to #{title}
+    div(id="container")
+        h4 Enter a url
+        form(method='get', action="/urls")
+            input(type='text' name="long_url" value="testval",  size="55", placeholder="copy/paste url here")
+            button Shorten
+

@@ -1,8 +1,46 @@
+
+
 body {
+  background-color: #000;
+  color: antiquewhite;
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+h1 {
+  /*display: inline;*/
+  font-size: 3rem;
+  text-align: center;
+  padding: 4vh auto;
+  /*border: 2px dotted red;*/
+}
+
+#container {
+  border: 2px dashed orange;
+  margin: 6vh auto;
+  width: 80vw;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 2vh 2vw;
+}
+
 a {
   color: #00B7FF;
+}
+
+h4 {
+  font-size: 1.6rem;
+}
+
+input {
+  padding: 2vh 1vw;
+
+}
+
+button {
+  /*margin-top: 2vh;*/
+  padding: 1vh 2vw;
+  font-size: 1.3rem;
 }
