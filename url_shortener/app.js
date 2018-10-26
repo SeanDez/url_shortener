@@ -9,6 +9,8 @@ var usersRouter = require('./routes/users');
 // var urlsRouter = require('./routes/urls');
 
 var app = express();
+require('dotenv').load();
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
