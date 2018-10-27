@@ -2,21 +2,23 @@ require("dotenv").load();
 
 // database connection
 const mongoose = require("mongoose");
-mongoose.connect(process.env.MONGO_URI);
+const unique_validator = require("mongoose-unique-validator");
 
 
 const ShortLinkSchema = new mongoose.Schema({
     long_link : {
         type : String,
         minLength : 5,
-        required : true,
-        unique : true // npm i mongoose-unique-validator --save
+        required : true
+        // unique : true   -- I don't want to cause an error here
     },
     short_link : {
         type : String,
         maxLength: 20
     }
 });
+
+ShortLinkSchema.plugin(unique_validator);
 
 
 // ASSIGN this new variable to the exports object, which has the following properties
