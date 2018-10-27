@@ -23,38 +23,45 @@ db.once('open', () => {
 // Functions
 
 
-const lookup_shortlink_or_create_new = (long_link) => {
-    // ShortLink.
-    const new_shortlink = new ShortLink();
-    new_shortlink.long_link = long_link;
-    // new_shortlink.short_link = 'S link';
+const lookup_shortlink = (long_link) => {
+    // construct a findOne query
+    let query = ShortLink.findOne({
+        'long_link' : long_link
+    });
 
-    short_link.save((error) => {
+    query.select('long_link short_link');
+    query.exec((error, record) => {
         if (error) {
-            console.log(error);
+            console.log(error)
         } else {
-
-            //chose a 4 digit random number
-            const new_shortid = shortid.generate();
-
-            //ensure it is not already assigned
-            const shortid_match_result = short_link.findOne({ short_link : new_shortid });
-            console.log('index.js:44: ', shortid_match_result);
-
-            //assign it / create new record
-            if (shortid_match_result === false) {
-                short_link.save({
-                    long_link : long_link,
-                    short_link : process.env.ROOT_DOMAIN + '/r/' + new_shortid
-                });
-                console.log('successfully saved new shortlink');
-            }
+            console.log("record", record);
         }
     })
 };
 
-// const
 
+// pass current record or create new and pass back
+const return_record_or_create_new = (record, long_link) => {
+    if (record) {
+        // record is found >> return it to the front end
+        console.log("found record ", record);
+        return record
+    } else if (record !== null || record !== undefined) {
+        // create a new record
+        const new_shortlink_record = new ShortLink({
+            long_link : long_link,
+            short_link : process.env.ROOT_DOMAIN + '/r/' + shortid.generate()
+        });
+        new_shortlink_record.save((error, saved_record) => {
+            if (error) {
+                console.log(error);
+            } else if (saved_record) {
+                console.log("saved record ", saved_record);
+            }
+        })
+
+    }
+};
 
 
 // API Endpoints
@@ -63,10 +70,11 @@ const lookup_shortlink_or_create_new = (long_link) => {
 router.get('/result', function (req, res, next) {
     const long_url = req.query.long_url;
 
-    lookup_shortlink_or_create_new(long_url);
-    route_to_homepage(new_shortlink);
+    return_record_or_create_new(lookup_shortlink(), long_url);
 
-    res.render('result', { title: "Results", short_url : long_url })
+    // render the data to the result page
+    res.render('result', { title: "Results", short_url : long_url });
+
 });
 
 
