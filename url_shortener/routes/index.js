@@ -94,6 +94,7 @@ router.get('/r/:short_link_id', (req, res, next) => {
         else if (document) {
             console.log("long link: ", document.long_link);
             res.redirect('http://' + document.long_link);
+            // in a full app I would check for http:// and only append if it was not there. OR clean it from the entry point
         } else {
             res.send('No matching shortlink');
         }
