@@ -23,45 +23,48 @@ db.once('open', () => {
 // Functions
 
 
-const lookup_shortlink = (long_link) => {
-    // construct a findOne query
-    let query = ShortLink.findOne({
-        'long_link' : long_link
+const lookup_shortlink = (long_link, not_found_callback) => {
+    console.log("long_link from parameter, before hitting the findOne ", long_link);
+
+    ShortLink.findOne({
+            long_link : long_link
+        },
+        function (error, document) {
+            if (error) {
+                console.log('error ', error)
+            } else if (document.long_link) {
+                console.log("document found during lookup", document);
+                console.log("document short_link", object.short_link);
+                return document.short_link;
+            } else {
+                console.log("document not found during lookup");
+                create_new_shortlink_record(long_link)
+            }
+        }
+    )
+};
+
+const create_new_shortlink_record = (long_link) => {
+    const short_link_record = new ShortLink({
+        long_link : long_link,
+        short_link : shortid.generate()
+    });
+    short_link_record.save((error, document) => {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('index.js:56', document.short_link);
+            // pass the short_url to index.pug
+            // render the data to the result page
+
+
+            res.render('result', { title: "Results", short_url : shortid.generate() + '/r/' + document.short_link });
+        }
     });
 
-    query.select('long_link short_link');
-    query.exec((error, record) => {
-        if (error) {
-            console.log(error)
-        } else {
-            console.log("record", record);
-        }
-    })
+
 };
 
-
-// pass current record or create new and pass back
-const return_record_or_create_new = (record, long_link) => {
-    if (record) {
-        // record is found >> return it to the front end
-        console.log("found record ", record);
-        return record
-    } else if (record !== null || record !== undefined) {
-        // create a new record
-        const new_shortlink_record = new ShortLink({
-            long_link : long_link,
-            short_link : process.env.ROOT_DOMAIN + '/r/' + shortid.generate()
-        });
-        new_shortlink_record.save((error, saved_record) => {
-            if (error) {
-                console.log(error);
-            } else if (saved_record) {
-                console.log("saved record ", saved_record);
-            }
-        })
-
-    }
-};
 
 
 // API Endpoints
@@ -70,10 +73,10 @@ const return_record_or_create_new = (record, long_link) => {
 router.get('/result', function (req, res, next) {
     const long_url = req.query.long_url;
 
-    return_record_or_create_new(lookup_shortlink(), long_url);
-
-    // render the data to the result page
-    res.render('result', { title: "Results", short_url : long_url });
+    // check if the long url is in the db already
+    // if yes then set short_url to the collection.short_url
+    // if no then generate new record
+    lookup_shortlink(long_url, create_new_shortlink_record)
 
 });
 
