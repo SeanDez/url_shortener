@@ -84,6 +84,23 @@ router.get('/result', function (req, res, next) {
 
 });
 
+router.get('/r/:short_link_id', (req, res, next) => {
+    const short_link_id = req.params.short_link_id;
+
+    ShortLink.findOne({
+        short_link : short_link_id
+    }, (error, document) => {
+        if (error) { console.log(error) }
+        else if (document) {
+            console.log("long link: ", document.long_link);
+            res.redirect('http://' + document.long_link);
+        } else {
+            res.send('No matching shortlink');
+        }
+    })
+
+});
+
 
 router.get('/', function(req, res, next) {
     res.render('index', { title: 'Express' });
