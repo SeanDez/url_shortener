@@ -44,26 +44,7 @@ const lookup_shortlink = (long_link, not_found_callback) => {
     )
 };
 
-const create_new_shortlink_record = (long_link) => {
-    const short_link_record = new ShortLink({
-        long_link : long_link,
-        short_link : shortid.generate()
-    });
-    short_link_record.save((error, document) => {
-        if (error) {
-            console.log(error);
-        } else {
-            console.log('index.js:56', document.short_link);
-            // pass the short_url to index.pug
-            // render the data to the result page
 
-
-            res.render('result', { title: "Results", short_url : shortid.generate() + '/r/' + document.short_link });
-        }
-    });
-
-
-};
 
 
 
@@ -74,9 +55,32 @@ router.get('/result', function (req, res, next) {
     const long_url = req.query.long_url;
 
     // check if the long url is in the db already
-    // if yes then set short_url to the collection.short_url
+    ShortLink.findOne({
+        long_link : long_url
+    }, (error, document) => {
+        if (error) {
+            console.log("error", error);
+
+    // match: set short_url to the collection.short_url
+        } else if (document) { // if the original link matches
+            console.log('document found', document);
+            res.render('result', { short_url : shortid.generate() + '/r/' + document.short_link })
+
     // if no then generate new record
-    lookup_shortlink(long_url, create_new_shortlink_record)
+        } else { // no match found
+            const short_link_document = new ShortLink({
+                long_link : long_url,
+                short_link : shortid.generate()
+            });
+            short_link_document.save((error, document) => {
+                if (error) { console.log(error) }
+                else {
+                    console.log('document saved: ', document);
+                    res.render('result', { short_url : process.env.ROOT_DOMAIN + '/r/' + document.short_link })
+                }
+            })
+        }
+    })
 
 });
 
